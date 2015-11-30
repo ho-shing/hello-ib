@@ -4,7 +4,7 @@ This is a very simple sample program to show how to use [Java IB API](https://gi
 
 Currently, the program is a console program (no UI) and only does one thing (I'll add more features later):
 
-* Provide a interactive console to query stock price
+* Provide an interactive console for querying stock price
 
 To understand more about what the API can do, you can explore the `com.ib.controller.ApiController` class and try out different methods provided by the `ApiController` class.
 
