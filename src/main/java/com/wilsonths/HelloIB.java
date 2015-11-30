@@ -1,5 +1,8 @@
 package com.wilsonths;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import com.ib.controller.*;
@@ -7,7 +10,10 @@ import com.ib.controller.ApiConnection.ILogger;
 import com.ib.controller.ApiController.IBulletinHandler;
 import com.ib.controller.ApiController.IConnectionHandler;
 import com.ib.controller.ApiController.ITimeHandler;
+import com.ib.controller.ApiController.ITopMktDataHandler;
+import com.ib.controller.Types.MktDataType;
 import com.ib.controller.Types.NewsType;
+import com.ib.controller.Types.SecType;
 
 public class HelloIB implements IConnectionHandler {
 	
@@ -30,6 +36,58 @@ public class HelloIB implements IConnectionHandler {
 	private void run() {
 		System.out.println("Begin connecting...");
 		this.controller.connect( "127.0.0.1", 7496, 0);
+		
+		try{
+		    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+		    String ticker;
+		    
+		    do  {
+		    	ticker = bufferRead.readLine();
+		    	
+		    	NewContract contract = new NewContract();
+				contract.conid(0);
+				contract.symbol(ticker.toUpperCase());
+				contract.secType(SecType.STK);
+				contract.exchange("SMART");
+				contract.currency("USD");
+				
+				this.controller.reqTopMktData(contract, "", true, new ITopMktDataHandler() {
+					
+					@Override
+					public void tickString(NewTickType tickType, String value) {
+						System.out.println("tickString - NewTickType:" + tickType.toString() + " value:" + value);
+					}
+					
+					@Override
+					public void tickSnapshotEnd() {
+						System.out.println("tickSnapshotEnd");
+					}
+					
+					@Override
+					public void tickSize(NewTickType tickType, int size) {
+						System.out.println("tickSize - NewTickType:" + tickType.toString() + " size:" + size);
+						
+					}
+					
+					@Override
+					public void tickPrice(NewTickType tickType, double price, int canAutoExecute) {
+						System.out.println("tickPrice - NewTickType:" + tickType.toString() + " price:" + price + " canAutoExecute:" + canAutoExecute);
+					}
+					
+					@Override
+					public void marketDataType(MktDataType marketDataType) {
+						System.out.println("marketDataType - marketDataType:" + marketDataType.toString());
+					}
+				});
+		    	
+		    } while (!ticker.equals("quit"));
+		}
+		catch(IOException e)
+		{
+			System.out.println(e.getLocalizedMessage());
+		}
+		
+		this.controller.disconnect();
 	}
 	
 	@Override
